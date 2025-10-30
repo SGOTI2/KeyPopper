@@ -1,9 +1,12 @@
 package com.nl;
 
 import java.awt.event.WindowListener;
+import java.awt.BorderLayout;
 import java.awt.event.WindowEvent;
 
 import javax.swing.JFrame;
+import javax.swing.JScrollPane;
+import javax.swing.JTextArea;
 import javax.swing.WindowConstants;
 
 import com.github.kwhat.jnativehook.GlobalScreen;
@@ -11,7 +14,8 @@ import com.github.kwhat.jnativehook.NativeHookException;
 import com.github.kwhat.jnativehook.dispatcher.SwingDispatchService;
 
 public class SwingUICore extends JFrame implements WindowListener {
-  GlobalListener globalListener;
+  private GlobalListener globalListener;
+  private JTextArea textArea;
 
   public SwingUICore(GlobalListener listener) {
     globalListener = listener;
@@ -23,10 +27,22 @@ public class SwingUICore extends JFrame implements WindowListener {
     setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
     addWindowListener(this);
     setVisible(true);
+
+    textArea = new JTextArea(10, 30);
+    textArea.setEditable(false);
+    add(new JScrollPane(textArea), BorderLayout.CENTER);
+    pack();
   }
-  
+
+  public void keyPressHook(String keyText) {
+    System.out.println(keyText);
+    String stringSummery = keyText;
+    textArea.setText(textArea.getText() + "\n" + stringSummery);
+  }
+
   public void windowOpened(WindowEvent e) {
 		globalListener.init();
+    globalListener.keyPressHook = (String T) -> keyPressHook(T);
 	}
 
 	public void windowClosed(WindowEvent e) {
@@ -40,6 +56,7 @@ public class SwingUICore extends JFrame implements WindowListener {
 
       System.exit(1);
     }
+    System.out.println("Deregistration was successful!\n[Your keys are no longer being tracked]");
     
 		System.exit(0);
 	}
